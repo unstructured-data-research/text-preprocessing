@@ -49,7 +49,7 @@ prep.phrase_replace(replace_dict=replacing_dict,
                     sort_dict=True,
                     case_sensitive_replacing=False)
 
-# lower-case text, expand contractions and initialize stopwords list
+# lower-case text and expand contractions
 prep.basic_cleaning(lower_case=True,
                     contraction_split=True)
 
