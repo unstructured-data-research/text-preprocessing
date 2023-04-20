@@ -56,7 +56,7 @@ prep.basic_cleaning(lower_case=True,
 # split the documents into tokens
 prep.tokenize_text(tokenization_pattern=pattern)
 
-# clean tokens (remove non-ascci characters, remove short tokens, remove punctuation and numbers)
+# clean tokens (remove non-ascii characters, remove short tokens, remove punctuation and numbers)
 prep.token_clean(length=2, 
                  punctuation=punctuation, 
                  numbers=True)
