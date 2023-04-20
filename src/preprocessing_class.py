@@ -489,4 +489,66 @@ class RawDocs():
             self.lemmas = [[t for t in doc if t in self.vocabulary[f'{items}']] for doc in self.lemmas]
 
 
+    def rank_remove(self, items, score_type, min_cutoff_score=-np.inf, max_cutoff_score=np.inf):
+        """
+        remove items based on the df or tfidf (specified in "score_type") 
+        score being less than the cutoff score provided. 
+        The get_term_ranking() function needs to be called before.
+        """
+
+        # verify that get_term_ranking() has already been called and that
+        # a valid item has been provided
+        if score_type=="df":
+            try:
+                self.df_ranking[items]
+            except (AttributeError, KeyError):
+                print("Please run the get_term_ranking() function first with the appropriate arguments")
+                
+        elif score_type=="tfidf":
+            try:
+                self.tfidf_ranking[items]
+            except (AttributeError, KeyError):
+                print("Please run the get_term_ranking() function first with the appropriate arguments")
+                
+        else:
+            raise ValueError("Score type must be either \'df\' (document frequency) or \'tfidf\' (term frequency inverse document frequency).")
+
+        # auxiliary function to easily remove undesired tokens
+        def remove(tokens, to_remove):
+            if to_remove:
+                return [t for t in tokens if t not in to_remove]
+            else:
+                return tokens
+
+        # consolidate list of tokens to be removed
+        if score_type == "df":
+            to_remove_low = set([t[1] for t in self.df_ranking["stems"] if t[0] <= min_cutoff_score])
+            to_remove_high = set([t[1] for t in self.df_ranking["stems"] if t[0] > max_cutoff_score])
+
+        elif score_type == "tfidf":
+            to_remove_low = set([t[1] for t in self.tfidf_ranking["stems"] if t[0] <= min_cutoff_score])
+            to_remove_high = set([t[1] for t in self.tfidf_ranking["stems"] if t[0] > max_cutoff_score])
+
+        # remove tokens from the appropriate place
+        if items == 'tokens':
+            #self.tokens = list(map(remove, self.tokens))
+            self.tokens = [remove(d, to_remove_low) for d in self.tokens]
+            self.tokens = [remove(d, to_remove_high) for d in self.tokens]
+
+        elif items == 'lemmas':
+            #self.lemmas = list(map(remove, self.lemmas))
+            self.lemmas = [remove(d, to_remove_low) for d in self.lemmas]
+            self.lemmas = [remove(d, to_remove_high) for d in self.lemmas]
+
+        elif items == 'stems':
+            #self.stems = list(map(remove, self.stems))
+            self.stems = [remove(d, to_remove_low) for d in self.stems]
+            self.stems = [remove(d, to_remove_high) for d in self.stems]
+        
+        elif items == "bigrams":
+            #self.bigrams = list(map(remove, self.bigrams))
+            self.bigrams = [remove(d, to_remove_low) for d in self.bigrams]
+            self.bigrams = [remove(d, to_remove_high) for d in self.bigrams]
+            
+            
 # %%
